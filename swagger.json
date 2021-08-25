@@ -1,0 +1,147 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Yet Another Node.js API to handle aria2 downloads",
+        "description": "Yet Another Node.js API to handle aria2 downloads",
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "host": "rack.thorez.loc:3000",
+    "basePath": "/api/v1",
+    "tags": [
+        {
+            "name": "Downloads",
+            "description": "API to manage download in the system"
+        }
+    ],
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/downloads": {
+            "post": {
+                "tags": [
+                    "Download"
+                ],
+                "description": "Post a new download to start",
+                "parameters": [
+                    {
+                        "name": "download",
+                        "in": "body",
+                        "description": "Download that we want to start",
+                        "schema": {
+                            "$ref": "#/definitions/Download"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "New download is started",
+                        "schema": {
+                            "$ref": "#/definitions/Download"
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Downloads"
+                ],
+                "summary": "Get all downloads in system",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Downloads"
+                        }
+                    }
+                }
+            }
+        },
+        "/stats": {
+            "get": {
+                "tags": [
+                    "Stats"
+                ],
+                "summary": "Get all Stats of the system",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Stats"
+                        }
+                    }
+                }
+            }
+        },
+        "/temperature": {
+            "get": {
+                "tags": [
+                    "Temperature"
+                ],
+                "summary": "Get all Temperature of the system",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Temperature"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Stats": {
+            "properties": {
+                "cpuName": {
+                    "type": "string",
+                    "uniqueItems": true
+                },
+                "cpuUsage": {
+                    "type": "string",
+                    "uniqueItems": true
+                },
+                "upTime": {
+                    "type": "string",
+                    "uniqueItems": true
+                },
+                "freemem": {
+                    "type": "string",
+                    "uniqueItems": true
+                },
+                "totalmem": {
+                    "type": "string",
+                    "uniqueItems": true
+                }
+            }
+        },
+        "Download": {
+            "required": [
+                "uri"
+            ],
+            "properties": {
+                "uri": {
+                    "type": "string",
+                    "uniqueItems": true
+                }
+            }
+        },
+        "Downloads": {
+            "type": "array",
+            "$ref": "#/definitions/Download"
+        }
+    }
+}
