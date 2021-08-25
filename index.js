@@ -1,3 +1,7 @@
+require("dotenv").config();
+
+const { API_PORT, HOST } = process.env;
+
 const downloads = require('./routes/downloads.js');
 const stats = require('./services/stats.js');
 
@@ -27,7 +31,9 @@ router.route('/temperature')
     .get(stats.temperature)
     ;
 
+swaggerDocument.host = `${HOST}:${API_PORT}`
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/v1', router);
 
-const server = app.listen(3000);
+const server = app.listen(API_PORT);
