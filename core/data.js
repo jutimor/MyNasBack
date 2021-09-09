@@ -1,5 +1,17 @@
 const mongoose = require('mongoose');
 const { MONGO_URI } = process.env;
+
+
+const winston = require('winston')
+const ecsFormat = require('@elastic/ecs-winston-format')
+
+const logger = winston.createLogger({
+    format: ecsFormat(),
+    transports: [
+        new winston.transports.Console()
+    ]
+})
+
 mongoose.connect(MONGO_URI,
     {
         useNewUrlParser: true,
@@ -11,7 +23,7 @@ mongoose.connect(MONGO_URI,
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
-    console.log('connected to mongo');
+    logger.info('connected to mongo');
 });
 
 const downloadSchema = new mongoose.Schema({

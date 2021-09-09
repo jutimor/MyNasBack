@@ -1,11 +1,21 @@
 const data = require('../core/data.js');
 
+const winston = require('winston')
+const ecsFormat = require('@elastic/ecs-winston-format')
+
+const logger = winston.createLogger({
+    format: ecsFormat(),
+    transports: [
+        new winston.transports.Console()
+    ]
+})
+
 const addDownload = (newDownload) => {
     const NewDownload = new data.Download({ ...newDownload, startedAt: new Date() });
 
     NewDownload.save(function (err, addedDownload) {
         if (err) return console.error(err);
-        console.log(addedDownload._id);
+        logger.info(addedDownload._id);
     });
 }
 
@@ -22,7 +32,7 @@ const updateDownloadStatus = (download) => {
             }
             foundDownload.save(function (err, addedDownload) {
                 if (err) return console.error(err);
-                console.log(addedDownload._id);
+                logger.info(addedDownload._id);
             });
         };
     });
@@ -43,7 +53,7 @@ const getDownloads = (callback) => {
 
 const deleteDownload = (gid, callback) => {
     const query = data.Download.where({ gid });
-    console.log(gid);
+    logger.info(gid);
     query.deleteOne(function (err, foundDownloads) {
         if (err) {
             return handleError(err);

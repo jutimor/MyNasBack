@@ -13,7 +13,43 @@ const app = express();
 const router = express.Router();
 const cors = require('cors');
 
-app.use(cors());
+const winston = require('winston')
+const ecsFormat = require('@elastic/ecs-winston-format')
+
+const logger = winston.createLogger({
+    format: ecsFormat(),
+    transports: [
+        new winston.transports.Console()
+    ]
+})
+
+
+logger.info('hi')
+logger.error('oops there is a problem', { err: new Error('boom') })
+
+const whitelist = [
+    'http://rack.thorez.net:3000',
+    'http://rack.thorez.loc:3000',
+    'http://localhost:3000',
+    'http://localhost:4200',
+    'http://nas.thorez.loc',
+    'http://nas.thorez.net'];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        logger.info(origin)
+        if (!origin || whitelist.indexOf(origin) !== -1) {
+            logger.info('accepted');
+            callback(null, true)
+        } else {
+            logger.info('refused');
+            callback(new Error('Not allowed by CORS'))
+        }
+    }
+}
+
+app.use(cors(corsOptions));
+
 
 app.use(express.json());
 

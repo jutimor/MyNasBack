@@ -10,6 +10,17 @@ const options = {
     path: '/jsonrpc'
 };
 
+
+const winston = require('winston')
+const ecsFormat = require('@elastic/ecs-winston-format')
+
+const logger = winston.createLogger({
+    format: ecsFormat(),
+    transports: [
+        new winston.transports.Console()
+    ]
+})
+
 const Aria2 = require("aria2");
 const aria2 = new Aria2([options]);
 
@@ -20,13 +31,13 @@ function init() {
     aria2
         .open()
         .then(async () => {
-            console.log("Connected to aria2 downloader");
+            logger.info("Connected to aria2 downloader");
         })
-        .catch((err) => console.log("error", err));
+        .catch((err) => logger.info("error", err));
 }
 
 aria2.on('onDownloadStart', async (params) => {
-    console.log("aria2 onDownloadStart", params[0].gid);
+    logger.info("aria2 onDownloadStart", params[0].gid);
     const result = await aria2.call("tellStatus", params[0].gid, ["gid", "status", "totalLength"]);
     schema.updateDownloadStatus({
         gid: params[0].gid,
@@ -35,7 +46,7 @@ aria2.on('onDownloadStart', async (params) => {
 });
 
 aria2.on('onDownloadPause', (params) => {
-    console.log("aria2 onDownloadPause", params);
+    logger.info("aria2 onDownloadPause", params);
     schema.updateDownloadStatus({
         gid: params[0].gid,
         status: 'pause'
@@ -43,7 +54,7 @@ aria2.on('onDownloadPause', (params) => {
 });
 
 aria2.on('onDownloadComplete', (params) => {
-    console.log("aria2 onDownloadComplete", params);
+    logger.info("aria2 onDownloadComplete", params);
     schema.updateDownloadStatus({
         gid: params[0].gid,
         status: 'completed'
@@ -51,7 +62,7 @@ aria2.on('onDownloadComplete', (params) => {
 });
 
 aria2.on('onDownloadStop', (params) => {
-    console.log("aria2 onDownloadStop", params);
+    logger.info("aria2 onDownloadStop", params);
     schema.updateDownloadStatus({
         gid: params[0].gid,
         status: 'stop'
@@ -59,7 +70,7 @@ aria2.on('onDownloadStop', (params) => {
 });
 
 aria2.on('onDownloadError', (params) => {
-    console.log("aria2 onDownloadError", params);
+    logger.info("aria2 onDownloadError", params);
     schema.updateDownloadStatus({
         gid: params[0].gid,
         status: 'error'
@@ -72,7 +83,7 @@ var updateDownload = async function (status, gid, callback) {
     }
     else {
         schema.deleteDownload(gid, function () {
-            console.log('deleted');
+            logger.info('deleted');
             callback();
         });
     }
@@ -120,7 +131,7 @@ var getAllDownloads = async function (callback) {
                     "gid", "status", "completedLength", "totalLength"]);
 
                 if (all[i].status === 'active' && activeDownloads.find(x => x.gid === all[i].gid)) {
-                    console.log('downloadSpeed', activeDownloads.find(x => x.gid === all[i].gid).downloadSpeed);
+                    logger.info('downloadSpeed', activeDownloads.find(x => x.gid === all[i].gid).downloadSpeed);
                     all[i] = {
                         name: all[i].name,
                         status: all[i].status,

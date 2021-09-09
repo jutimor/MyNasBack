@@ -1,9 +1,17 @@
 var os = require('os-utils');
 var _os = require('os');
-const { time } = require('console');
 const { exec } = require("child_process");
 
 
+const winston = require('winston')
+const ecsFormat = require('@elastic/ecs-winston-format')
+
+const logger = winston.createLogger({
+    format: ecsFormat(),
+    transports: [
+        new winston.transports.Console()
+    ]
+})
 
 var statReport = function (req, res, next) {
     const report = {};
@@ -22,7 +30,7 @@ var statReport = function (req, res, next) {
 
     const usage = (totalIdle) / (totalIdle + totalNice + totalSys + totalIrq + totalUser);
 
-    console.log(cpuName + ' Usage (%): ' + (1 - usage));
+    logger.info(cpuName + ' Usage (%): ' + (1 - usage));
     report['cpuName'] = cpuName;
     report['cpuUsage'] = 1 - usage;
 
@@ -34,11 +42,11 @@ var statReport = function (req, res, next) {
 var temperature = (req, res, next) => {
     exec("sensors -j", (error, stdout, stderr) => {
         if (error) {
-            console.log(`error: ${error.message}`);
+            logger.info(`error: ${error.message}`);
             return res.send({});
         }
         if (stderr) {
-            console.log(`stderr: ${stderr}`);
+            logger.info(`stderr: ${stderr}`);
             return res.send({});
         }
 
