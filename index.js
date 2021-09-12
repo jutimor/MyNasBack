@@ -25,7 +25,6 @@ const logger = winston.createLogger({
 
 
 logger.info('hi')
-logger.error('oops there is a problem', { err: new Error('boom') })
 
 const whitelist = [
     'http://rack.thorez.net:3000',
