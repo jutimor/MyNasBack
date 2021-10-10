@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const { API_PORT, HOST } = process.env;
+const { API_PORT, HOST, PREFIX } = process.env;
 
 const downloads = require('./routes/downloads.js');
 const stats = require('./services/stats.js');
@@ -27,14 +27,9 @@ const logger = winston.createLogger({
 logger.info('hi');
 
 const whitelist = [
-    'http://nas.thorez.loc',
-    'http://nas.thorez.net',
-    'http://rack.thorez.net:3000',
-    'http://rack.thorez.loc:3000',
-    'http://localhost:3000',
-    'http://localhost:4200',
-    'http://nas.thorez.loc',
-    'http://nas.thorez.net'];
+    `http://nas.thorez.loc/${PREFIX}`,
+    `http://nas.thorez.net/${PREFIX}`,
+    'http://localhost:4200'];
 
 const corsOptions = {
     origin: function (origin, callback) {
@@ -68,9 +63,9 @@ router.route('/temperature')
     .get(stats.temperature)
     ;
 
-swaggerDocument.host = `${HOST}:${API_PORT}`
+swaggerDocument.host = `${HOST}:${API_PORT}/${PREFIX}`;
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use('/api/v1', router);
+app.use(`${PREFIX}/api-docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(`${PREFIX}/api/v1`, router);
 
 const server = app.listen(API_PORT);
