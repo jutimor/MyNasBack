@@ -24,9 +24,11 @@ const logger = winston.createLogger({
 })
 
 
-logger.info('hi')
+logger.info('hi');
 
 const whitelist = [
+    'http://nas.thorez.loc',
+    'http://nas.thorez.net',
     'http://rack.thorez.net:3000',
     'http://rack.thorez.loc:3000',
     'http://localhost:3000',
