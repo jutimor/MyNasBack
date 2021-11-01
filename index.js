@@ -21,10 +21,7 @@ const logger = winston.createLogger({
     transports: [
         new winston.transports.Console()
     ]
-})
-
-
-logger.info('hi');
+});
 
 const whitelist = [
     'http://nas.thorez.loc',
