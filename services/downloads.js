@@ -79,7 +79,11 @@ aria2.on('onDownloadError', (params) => {
 
 var updateDownload = async function (status, gid, callback) {
     if (status !== 'delete') {
-        await aria2.call(status, gid);
+        try {
+            await aria2.call(status, gid);
+        } catch (error) {
+            this.logger.error(error);
+        }
     }
     else {
         schema.deleteDownload(gid, function () {
@@ -90,18 +94,22 @@ var updateDownload = async function (status, gid, callback) {
 }
 
 var addDownload = async function (uri) {
+    try {
+        const guid = await aria2.call("addUri", [uri], { dir: '/raid/share/Telechargements/' });
+        var tmp = uri.split('/');
+        const newDownload = {
+            name: tmp[tmp.length - 1],
+            uri: uri,
+            gid: guid
+        };
 
-    const guid = await aria2.call("addUri", [uri], { dir: '/raid/share/Telechargements/' });
-    var tmp = uri.split('/');
-    const newDownload = {
-        name: tmp[tmp.length - 1],
-        uri: uri,
-        gid: guid
-    };
+        schema.addDownload(newDownload);
 
-    schema.addDownload(newDownload);
-
-    return guid;
+        return guid;
+    } catch (error) {
+        this.logger.error(error);
+        return "";
+    }
 };
 
 function castAsDownload(item, uri) {
@@ -122,25 +130,36 @@ function castAsDownload(item, uri) {
 
 var getAllDownloads = async function (callback) {
 
-    var activeDownloads = await aria2.call("tellActive");
+    var activeDownloads = [];
+    try {
+        activeDownloads = await aria2.call("tellActive");
+    } catch (error) {
+        logger.error(error);
+    }
+
     schema.getDownloads(async function (all) {
 
         for (var i = 0; i < all.length; i++) {
             if (all[i].status !== 'completed' && all[i].status !== 'error') {
-                const detail = await aria2.call("tellStatus", all[i].gid, [
-                    "gid", "status", "completedLength", "totalLength"]);
+                try {
+                    const detail = await aria2.call("tellStatus", all[i].gid, [
+                        "gid", "status", "completedLength", "totalLength"]);
 
-                if (all[i].status === 'active' && activeDownloads.find(x => x.gid === all[i].gid)) {
-                    logger.info('downloadSpeed', activeDownloads.find(x => x.gid === all[i].gid).downloadSpeed);
-                    all[i] = {
-                        name: all[i].name,
-                        status: all[i].status,
-                        gid: all[i].gid,
-                        completedLength: detail.completedLength,
-                        totalLength: detail.totalLength,
-                        downloadSpeed: activeDownloads.find(x => x.gid === all[i].gid).downloadSpeed,
-                        percent: detail.completedLength / detail.totalLength
-                    };
+                    if (all[i].status === 'active' && activeDownloads.find(x => x.gid === all[i].gid)) {
+                        logger.info('downloadSpeed', activeDownloads.find(x => x.gid === all[i].gid).downloadSpeed);
+                        all[i] = {
+                            name: all[i].name,
+                            status: all[i].status,
+                            gid: all[i].gid,
+                            completedLength: detail.completedLength,
+                            totalLength: detail.totalLength,
+                            downloadSpeed: activeDownloads.find(x => x.gid === all[i].gid).downloadSpeed,
+                            percent: detail.completedLength / detail.totalLength
+                        };
+                    }
+
+                } catch (error) {
+                    this.logger.error(error);
                 }
 
             }

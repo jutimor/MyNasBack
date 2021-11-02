@@ -2,7 +2,9 @@ require("dotenv").config();
 
 const { API_PORT, HOST } = process.env;
 
-const downloads = require('./routes/downloads.js');
+const downloadsRoutes = require('./routes/downloads.routes.js');
+const healthcheckRoutes = require('./routes/healthcheck.routes.js');
+
 const stats = require('./services/stats.js');
 
 const swaggerUi = require('swagger-ui-express'),
@@ -14,7 +16,8 @@ const router = express.Router();
 const cors = require('cors');
 
 const winston = require('winston')
-const ecsFormat = require('@elastic/ecs-winston-format')
+const ecsFormat = require('@elastic/ecs-winston-format');
+const healthCheckModule = require("./routes/healthcheck.routes.js");
 
 const logger = winston.createLogger({
     format: ecsFormat(),
@@ -51,10 +54,13 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 
+router.route('/healthcheck')
+    .get(healthCheckModule.getHealthCheck);
+
 router.route('/downloads')
-    .post(downloads.addDownload)
-    .get(downloads.getAllDownloads)
-    .put(downloads.updateStatus)
+    .post(downloadsRoutes.addDownload)
+    .get(downloadsRoutes.getAllDownloads)
+    .put(downloadsRoutes.updateStatus)
     ;
 
 router.route('/stats')
