@@ -95,7 +95,7 @@ var updateDownload = async function (status, gid, callback) {
 
 var addDownload = async function (uri) {
     try {
-        const guid = await aria2.call("addUri", [uri], { dir: '/raid/share/Telechargements/' });
+        const guid = await aria2.call("addUri", [uri], { dir: '/data/' });
         var tmp = uri.split('/');
         const newDownload = {
             name: tmp[tmp.length - 1],
@@ -159,7 +159,7 @@ var getAllDownloads = async function (callback) {
                     }
 
                 } catch (error) {
-                    this.logger.error(error);
+                    logger.error(error);
                 }
 
             }
